@@ -1,0 +1,21 @@
+{
+  "name": "benchmark-postgres-surrealdb-myrocks-cratedb",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/pg": "^8.10.3",
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@digitak/esrun": "^3.2.25",
+    "@faker-js/faker": "^8.1.0",
+    "cassandra-driver": "^4.7.2",
+    "mariadb": "^3.2.1",
+    "pg": "^8.11.3",
+    "postgres": "^3.3.5",
+    "surrealdb.js": "^0.9.1"
+  }
+}

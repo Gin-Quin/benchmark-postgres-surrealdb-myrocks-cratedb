@@ -7,19 +7,19 @@ services:
     restart: always
     ports:
       - "5435:5432"
+    command: postgres -c max_connections=200
     environment:
       POSTGRES_PASSWORD: password
-      POSTGRES_USER: taler
-      POSTGRES_DB: main
+      POSTGRES_USER: postgres
 
-  myRocks:
-    container_name: benchmark-myrocks
-    image: blep/docker-mariadb-myrocks:latest
-    restart: always
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: secret
+  # myRocks:
+  #   container_name: benchmark-myrocks
+  #   image: blep/docker-mariadb-myrocks:latest
+  #   restart: always
+  #   ports:
+  #     - "3306:3306"
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: secret
 
   crateDB:
     container_name: benchmark-cratedb
@@ -27,6 +27,29 @@ services:
     restart: always
     ports:
       - "4200:4200"
-      - "4300:4300"
+      - "5436:5432"
     environment:
       CRATE_HEAP_SIZE: 2g
+  
+  surrealdb:
+    container_name: benchmark-surrealdb
+    entrypoint: 
+      - /surreal 
+      - start 
+      - --user
+      - root
+      - --pass
+      - root
+    image: surrealdb/surrealdb:latest
+    volumes:
+      - ./surrealdb:/surrealdb
+    ports:
+      - 8000:8000
+
+  scylla:
+    container_name: benchmark-scylla
+    image: scylladb/scylla:latest
+    restart: always
+    ports:
+      - "9042:9042"
+      - "9160:9160"
