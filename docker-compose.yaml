@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+  postgres:
+    container_name: benchmark-postgres
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: taler
+      POSTGRES_DB: main
+
+  myRocks:
+    container_name: benchmark-myrocks
+    image: blep/docker-mariadb-myrocks:latest
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+
+  crateDB:
+    container_name: benchmark-cratedb
+    image: crate:latest
+    restart: always
+    ports:
+      - "4200:4200"
+      - "4300:4300"
+    environment:
+      CRATE_HEAP_SIZE: 2g
