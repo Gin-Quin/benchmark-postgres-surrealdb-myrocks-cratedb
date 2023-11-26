@@ -4,7 +4,7 @@
   "type": "module",
   "devDependencies": {
     "@types/pg": "^8.10.3",
-    "bun-types": "latest"
+    "bun-types": "^1.0.14"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -12,6 +12,8 @@
   "dependencies": {
     "@digitak/esrun": "^3.2.25",
     "@faker-js/faker": "^8.1.0",
+    "@types/better-sqlite3": "^7.6.8",
+    "better-sqlite3": "^9.1.1",
     "cassandra-driver": "^4.7.2",
     "mariadb": "^3.2.1",
     "pg": "^8.11.3",
