@@ -1,24 +1,24 @@
-import  mariadb, { Connection } from 'mariadb';
+import mariadb, { Connection } from "mariadb"
 
 const pool = mariadb.createPool({
-     host: 'localhost', 
-	  port: 3306,
-     user: 'root', 
-     password: 'secret',
-     connectionLimit: 5,
-	  database: 'myrocks'
-});
+	host: "localhost",
+	port: 3306,
+	user: "root",
+	password: "secret",
+	connectionLimit: 5,
+	database: "myrocks",
+})
 
 main()
 
 async function main() {
-	const connection = await pool.getConnection();
+	const connection = await pool.getConnection()
 	console.log("Connected to MyRocks")
-	await initTables(connection);
-	// await insertData(connection);
-	// const authors = await connection.query("SELECT * FROM AUTHORS")
-	// console.log("authors", authors)
-	await connection.end();
+	await initTables(connection)
+	await insertData(connection)
+	const authors = await connection.query("SELECT * FROM AUTHORS")
+	console.log("authors", authors)
+	await connection.end()
 }
 
 async function insertData(connection: Connection) {
@@ -58,13 +58,13 @@ async function insertData(connection: Connection) {
 			(519, 'Journey to Middle Earth', 208, '978-3-16-139810-0', 23.99), 
 			(520, 'The Andes', 202, '978-3-16-115320-0', 21.99);
 		`)
-	 }
+}
 
 async function initTables(connection: Connection) {
 	await connection.query("DROP DATABASE IF EXISTS myrocks")
 	console.log("Dropped myrocks")
 	await connection.query("CREATE DATABASE myrocks")
-	console.log("Created myrocks") 
+	console.log("Created myrocks")
 
 	await connection.query(`
 		CREATE TABLE AUTHORS (

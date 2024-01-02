@@ -82,7 +82,7 @@ async function insertAuthors(count: number) {
 async function pickAuthors(ids: string[]) {
 	await Promise.all(
 		ids.map(id => {
-			const query = `SELECT * FROM authors WHERE id = '${ids[0]}'`
+			const query = `SELECT * FROM authors WHERE id = '${id}'`
 			return db.exec(query)
 		})
 	)
