@@ -16,8 +16,20 @@ This is not an extensive benchmark, relations have not been tested. Only writes 
   <tr>
     <th>Postgres</th>
     <th>865ms</th>
-    <th>30ms</th>
-    <th>3ms</th>
+    <th>60ms</th>
+    <th>6ms</th>
+  </tr>
+  <tr>
+    <th>SQLite (bun)</th>
+    <th>290ms</th>
+    <th>100ms</th>
+    <th>0.03ms</th>
+  </tr>
+  <tr>
+    <th>SQLite (node + better-sqlite-3)</th>
+    <th>171ms</th>
+    <th>27ms</th>
+    <th>0.361ms</th>
   </tr>
   <tr>
     <th>Surreal</th>
@@ -65,6 +77,7 @@ This is not an extensive benchmark, relations have not been tested. Only writes 
 - Postgres, Surreal, LevelDB and RocksDB are the most stable databases, as they never crashed. Scylla crashes when you get more than 2048 simultaneous requests, which is a shame because it's where it shines. Crate crashes when you have a lot of simultaneous reads (it's an error from the postgres driver though, but still proves some instability).
 - Crate has an annoying drawback: when you make a write, the change is not immediately effective and you can't read it before about 1 second. It may cause some annoying bugs.
 - When comparing LevelDB and RocksDB with Bun FFI, both databases offer similar performances, excellent both for writing and picking values from a given id. If you need the most writing-intensive architecture, RocksDB can handle more writing (up to 2x faster for very big loads). LevelDB is easier to integrate into a Javascript server thanks to a nice library. But both are incredible databases.
-- As always, Bun is faster than Node to run LevelDB, especially for reading.
+- Bun is faster than Node to run LevelDB, especially for reading.
+- Node with better-sqlite-3 seems faster than Bun's SQLite for writing and picking specific values to database, but Bun's SQLite is extremely fast to scan the database.
 - Surreal offers an awesome developer experience. The documentation is very clear, the installation super smooth, and the SDKs as well as the query language are great. It's 3 times better than Postgres for writing documents separately, but 3 to 6 times slower to read these documents. Might be a good alternative for write-intensive projects.
 - Except for Postgres, the other databases are bad for migration. Migrating a database means transforming the structure of a table. If you opt for a NoSQL database, you should use "soft migrations" (migrating a document when the document is loaded) rather than "hard migration" (migrating all documents at once).
