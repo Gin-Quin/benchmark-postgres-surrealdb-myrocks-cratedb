@@ -37,7 +37,7 @@ struct RocksDBContext* initialize_database(const char* db_path) {
 		long cpus = sysconf(_SC_NPROCESSORS_ONLN);
 	#endif
 
-	rocksdb_options_increase_parallelism(context->options, (int)cpus);
+	// rocksdb_options_increase_parallelism(context->options, (int)cpus);
 	rocksdb_options_set_create_if_missing(context->options, 1);
 	rocksdb_options_set_compression(context->options, rocksdb_snappy_compression);
 

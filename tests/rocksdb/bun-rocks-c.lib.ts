@@ -1,14 +1,7 @@
-import {
-	CString,
-	dlopen,
-	FFIType,
-	JSCallback,
-	Pointer,
-	ptr,
-	toArrayBuffer,
-} from "bun:ffi"
+import { dlopen, FFIType, Pointer, ptr, toArrayBuffer } from "bun:ffi"
 import process from "node:process"
 
+// path might change depending on your OS (not always a .so file)
 const path = `tests/rocksdb/librocksdb_c.so`
 // const path = `librocksdb_c.so`
 

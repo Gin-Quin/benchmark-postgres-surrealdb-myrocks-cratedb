@@ -37,14 +37,34 @@ This is not an extensive benchmark, relations have not been tested. Only writes 
     <th>CRASH</th>
     <th>5ms</th>
   </tr>
+  <tr>
+    <th>LevelDB (bun)</th>
+    <th>60ms</th>
+    <th>15ms</th>
+    <th>35ms</th>
+  </tr>
+  <tr>
+    <th>LevelDB (node)</th>
+    <th>60ms</th>
+    <th>32ms</th>
+    <th>50ms</th>
+  </tr>
+  <tr>
+    <th>RocksDB (bun)</th>
+    <th>44ms</th>
+    <th>11ms</th>
+    <th>?</th>
+  </tr>
 </table>
 
 ## Conclusion
 
-- If you need a huge amount of small writes, Postgres is not to be considered. Scylla is overperforming other databases, and Crate is quite good as well.
+- If you need a huge amount of small writes, Postgres is not to be considered. If you don't need to perform database scanning, LevelDB and RocksDB are the best choices. Otherwise, Scylla is overperforming other databases, and Crate is quite good as well.
 - If you need to read big amounts of data, Postgres is by far the best. All other databases are quite slow, and Scylla is the worst by far.
 - If you need to read a lot of small elements by id rather than bulks of data, Scylla is a good option, outperforming Surreal.
-- Postgres and Surreal are the most stable databases, as they never crashed. Scylla crashes when you get more than 2048 simultaneous requests, which is a shame because it's where it shines. Crate crashes when you have a lot of simultaneous reads (it's an error from the postgres driver though, but still proves some instability).
+- Postgres, Surreal, LevelDB and RocksDB are the most stable databases, as they never crashed. Scylla crashes when you get more than 2048 simultaneous requests, which is a shame because it's where it shines. Crate crashes when you have a lot of simultaneous reads (it's an error from the postgres driver though, but still proves some instability).
 - Crate has an annoying drawback: when you make a write, the change is not immediately effective and you can't read it before about 1 second. It may cause some annoying bugs.
-- Surreal has the best developer experience by far. The documentation is very clear, the installation super smooth, and the SDKs as well as the query language are great. It's 3 times better than Postgres for writing documents separately, but 3 to 6 times slower to read these documents. Might be a good alternative for write-intensive projects.
+- When comparing LevelDB and RocksDB with Bun FFI, both databases offer similar performances, excellent both for writing and picking values from a given id. If you need the most writing-intensive architecture, RocksDB can handle more writing (up to 2x faster for very big loads). LevelDB is easier to integrate into a Javascript server thanks to a nice library. But both are incredible databases.
+- As always, Bun is faster than Node to run LevelDB, especially for reading.
+- Surreal offers an awesome developer experience. The documentation is very clear, the installation super smooth, and the SDKs as well as the query language are great. It's 3 times better than Postgres for writing documents separately, but 3 to 6 times slower to read these documents. Might be a good alternative for write-intensive projects.
 - Except for Postgres, the other databases are bad for migration. Migrating a database means transforming the structure of a table. If you opt for a NoSQL database, you should use "soft migrations" (migrating a document when the document is loaded) rather than "hard migration" (migrating all documents at once).
