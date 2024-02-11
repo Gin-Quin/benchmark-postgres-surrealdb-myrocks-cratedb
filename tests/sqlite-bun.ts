@@ -3,7 +3,7 @@ import { fakerDE as faker } from "@faker-js/faker"
 import { escape } from "./utilities/escape"
 import { randomUUID } from "crypto"
 
-const db = new Database("test-bun.db")
+const db = new Database("test-bun.db", { create: true })
 
 main()
 
@@ -13,54 +13,50 @@ async function main() {
 	const count = 2048
 	const stage = `Insert ${count} authors`
 	console.time(stage)
-	const ids = await insertAuthors(count)
+	const ids = await insertauthors(count)
 	console.timeEnd(stage)
 
 	console.time("Pick authors")
-	await pickAuthors(ids)
+	await pickauthors(ids)
 	console.timeEnd("Pick authors")
 
 	console.time("Select authors")
-	db.query(`SELECT * FROM AUTHORS`)
+	db.query(`SELECT * FROM authors`).run()
 	console.timeEnd("Select authors")
 }
 
 async function initSQL() {
 	await db.exec("PRAGMA journal_mode = WAL;")
 
-	await db
-		.query(
-			`
-	DROP TABLE IF EXISTS BOOKS;
-	DROP TABLE IF EXISTS AUTHORS;
-
-	CREATE TABLE AUTHORS
+	await db.exec(`DROP TABLE IF EXISTS BOOKS;`)
+	await db.exec(`DROP TABLE IF EXISTS authors;`)
+	await db.exec(`CREATE TABLE authors
 	(
 		id text PRIMARY KEY, 
 		first_name text,
 		last_name text
-	);
-	
-	CREATE TABLE BOOKS
+	);`)
+	await db.exec(
+		`CREATE TABLE BOOKS
 	(
 		id text PRIMARY KEY,
 		name text,
-		author text REFERENCES AUTHORS(id),
+		author text REFERENCES authors(id),
 		isnb text,
 		price int
 	);`
-		)
-		.run()
+	)
 }
 
-async function insertAuthors(count: number) {
+const insertauthorsQuery = db.query(
+	`INSERT INTO authors (id, first_name, last_name) VALUES ($id, $firstName, $lastName)`
+)
+
+async function insertauthors(count: number) {
 	const ids = new Array(count).fill(0).map(() => randomUUID())
 
-	const query = db.query(
-		`INSERT INTO authors (id, first_name, last_name) VALUES ($id, $firstName, $lastName)`
-	)
 	const queries = ids.map(id =>
-		query.run({
+		insertauthorsQuery.run({
 			$id: id,
 			$firstName: escape(faker.person.firstName()),
 			$lastName: escape(faker.person.lastName()),
@@ -82,17 +78,14 @@ async function insertAuthors(count: number) {
 	// 		() =>
 	// 			`('${escape(faker.person.firstName())}', '${escape(faker.person.lastName())}')`
 	// 	)
-	// const query = `INSERT INTO AUTHORS(first_name, last_name) VALUES ${authors.join(",")}`
+	// const query = `INSERT INTO authors(first_name, last_name) VALUES ${authors.join(",")}`
 	// await db.query(query).run()
 
 	return ids
 }
 
-async function pickAuthors(ids: string[]) {
-	await Promise.all(
-		ids.map(id => {
-			const query = `SELECT * FROM authors WHERE id = '${id}'`
-			return db.query(query).run()
-		})
-	)
+const pickAuthorQuery = db.query(`SELECT * FROM authors WHERE id = $id`)
+
+async function pickauthors(ids: string[]) {
+	await Promise.all(ids.map($id => pickAuthorQuery.run({ $id })))
 }

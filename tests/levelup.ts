@@ -22,6 +22,14 @@ async function main() {
 	console.time("Select authors")
 	await getAllAuthors()
 	console.timeEnd("Select authors")
+
+	console.time("Select 1 author")
+	await pickAuthors([ids[0]])
+	console.timeEnd("Select 1 author")
+
+	console.time("Select X times the same author")
+	await pickAuthors(new Array(count).fill(ids[0]))
+	console.timeEnd("Select X times the same author")
 }
 
 async function insertAuthors(count: number) {

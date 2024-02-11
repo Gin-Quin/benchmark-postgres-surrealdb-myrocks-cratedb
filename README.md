@@ -21,15 +21,15 @@ This is not an extensive benchmark, relations have not been tested. Only writes 
   </tr>
   <tr>
     <th>SQLite (bun)</th>
-    <th>290ms</th>
-    <th>100ms</th>
-    <th>0.03ms</th>
+    <th>150ms</th>
+    <th>28ms</th>
+    <th>0.50ms</th>
   </tr>
   <tr>
     <th>SQLite (node + better-sqlite-3)</th>
     <th>171ms</th>
     <th>27ms</th>
-    <th>0.361ms</th>
+    <th>0.36ms</th>
   </tr>
   <tr>
     <th>Surreal</th>
