@@ -1,8 +1,8 @@
 import { fakerDE as faker } from "@faker-js/faker"
-import SQLite from "better-sqlite3"
 import { randomUUID } from "crypto"
 import { escape } from "./utilities/escape"
 
+import SQLite from "better-sqlite3"
 const db = new SQLite("test.db")
 
 main()

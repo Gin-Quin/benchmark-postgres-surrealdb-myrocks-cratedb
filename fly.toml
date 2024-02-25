@@ -1,0 +1,26 @@
+# fly.toml app configuration file generated for benchmark-postgres-surrealdb-myrocks-cratedb on 2024-02-25T22:54:31+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'benchmark-postgres-surrealdb-myrocks-cratedb'
+primary_region = 'cdg'
+
+[build]
+  dockerfile = 'Dockerfile'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  max_machines_running = 1
+  processes = ['app']
+
+[[vm]]
+  size = 'shared-cpu-1x'
+
+[mounts]
+  source="bun_sqlite_data_2"
+  destination="/data"
