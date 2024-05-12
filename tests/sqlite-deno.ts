@@ -1,84 +1,82 @@
-import { DB } from "https://deno.land/x/sqlite@v3.7.0/mod.ts"
+import { DB } from "https://deno.land/x/sqlite/mod.ts"
 import { fakerDE as faker } from "npm:@faker-js/faker"
 import { randomUUID } from "node:crypto"
+import { escape } from "./utilities/escape.ts"
 
-const escape = (value: string) => value.replace(/'/g, "\\'")
+// Open a database
+const db = new DB("test-deno.db")
+// db.executeute(`
+//   CREATE TABLE IF NOT EXISTS people (
+//     id INTEGER PRIMARY KEY AUTOINCREMENT,
+//     name TEXT
+//   )
+// `)
 
-// Open a database to be held in memory
-const db = new DB("test-deno") // or new DB()
-// Use new DB("file.db"); for a file-based database
+// // Run a simple query
+// for (const name of ["Peter Parker", "Clark Kent", "Bruce Wayne"]) {
+// 	db.query("INSERT INTO people (name) VALUES (?)", [name])
+// }
 
-db.execute(`
-  CREATE TABLE IF NOT EXISTS people (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT
-  )`)
+// // Print out data in table
+// for (const [name] of db.query("SELECT name FROM people")) {
+// 	console.log(name)
+// }
+
+// // Close connection
+// db.close()
 
 main()
 
-async function main() {
+function main() {
 	console.log("HEY ??")
 	console.time("Hello")
-	await initSQL()
+	initSQL()
 	console.timeEnd("Hello")
 	console.log("ZAB")
 
-	const count = 2048
+	const count = 50
 	const stage = `Insert ${count} authors`
 	console.log("ZAB")
 	console.time(stage)
-	const ids = await insertAuthors(count)
+	const ids = insertAuthors(count)
 	console.log("ZAB")
 	console.timeEnd(stage)
 	console.log("ZOB")
 	console.log("ZUB")
 
 	console.time("Pick authors")
-	await pickAuthors(ids)
+	pickAuthors(ids)
 	console.timeEnd("Pick authors")
 
 	console.time("Select authors")
-	db.query(`SELECT * FROM AUTHORS`)
+	const authors = db.query(`SELECT * FROM AUTHORS`)
+	console.log("authors", authors)
 	console.timeEnd("Select authors")
 
 	db.close()
 }
 
-async function initSQL() {
-	await db.execute("PRAGMA journal_mode = WAL;")
+function initSQL() {
+	db.execute("PRAGMA journal_mode = WAL;")
 
-	await db.execute(
-		`
-	  DROP TABLE IF EXISTS BOOKS;
-	  DROP TABLE IF EXISTS AUTHORS;
-  
-	  CREATE TABLE AUTHORS
-	  (
-		  id text PRIMARY KEY, 
-		  first_name text,
-		  last_name text
-	  );
-	  
-	  CREATE TABLE BOOKS
-	  (
-		  id text PRIMARY KEY,
-		  name text,
-		  author text REFERENCES AUTHORS(id),
-		  isnb text,
-		  price int
-	  );`
-	)
+	db.execute(`DROP TABLE IF EXISTS authors;`)
+	db.execute(`CREATE TABLE authors
+	(
+		id text PRIMARY KEY, 
+		first_name text,
+		last_name text
+	);`)
 }
 
-async function insertAuthors(count: number) {
+function insertAuthors(count: number) {
 	const ids = new Array(count).fill(0).map(() => randomUUID())
-	const queries = ids.map(
-		id =>
-			`INSERT INTO authors (id, first_name, last_name) VALUES ('${id}', '${escape(
-				faker.person.firstName()
-			)}', '${escape(faker.person.lastName())}');`
+	ids.map(id =>
+		db.query(`INSERT INTO authors (id, first_name, last_name) VALUES (?, ?, ?);`, [
+			id,
+			escape(faker.person.firstName()),
+			escape(faker.person.lastName()),
+		])
 	)
-	await Promise.all(queries.map(query => db.query(query)))
 	return ids
 
 	// const authors = new Array(count)
@@ -91,11 +89,9 @@ async function insertAuthors(count: number) {
 	// await db.query(query)
 }
 
-async function pickAuthors(ids: string[]) {
-	await Promise.all(
-		ids.map(id => {
-			const query = `SELECT * FROM authors WHERE id = '${id}'`
-			return db.query(query)
-		})
-	)
+function pickAuthors(ids: string[]) {
+	ids.map(id => {
+		const query = `SELECT * FROM authors WHERE id = '${id}'`
+		return db.query(query)
+	})
 }

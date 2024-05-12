@@ -64,11 +64,12 @@ async function initSQL() {
 
 		CREATE TABLE AUTHORS
 		(
-			id text PRIMARY KEY, 
-			first_name text,
-			last_name text
+			id text NOT NULL,
+			time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			first_name text NOT NULL,
+			last_name text NOT NULL
 		);
-	`)
+		`)
 	} catch (error) {
 		console.log("Already initialized", error)
 	}

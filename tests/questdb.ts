@@ -1,14 +1,13 @@
 import { fakerDE as faker } from "@faker-js/faker"
 import postgres from "postgres"
 import { escape } from "./utilities/escape"
-import { cpuUsage } from "process"
 import { randomUUID } from "crypto"
 
 const sql = postgres({
 	host: "localhost",
-	username: "postgres",
-	password: "password",
-	port: 5442,
+	username: "admin",
+	password: "quest",
+	port: 8812,
 })
 
 main()
@@ -26,9 +25,9 @@ async function main() {
 	await pickAuthors(ids)
 	console.timeEnd("Pick authors")
 
-	console.time("Select authors")
-	await sql`SELECT * FROM AUTHORS`
-	console.timeEnd("Select authors")
+	// console.time("Select authors")
+	// await sql`SELECT * FROM AUTHORS`
+	// console.timeEnd("Select authors")
 	// console.log("authors", authors)
 }
 
@@ -36,9 +35,9 @@ async function insertAuthors(count: number) {
 	const ids = new Array(count).fill(0).map(() => randomUUID())
 	const queries = ids.map(
 		id =>
-			`INSERT INTO authors (id, first_name, last_name) VALUES ('${id}', '${escape(
-				faker.person.firstName()
-			)}', '${escape(faker.person.lastName())}');`
+			`INSERT INTO authors (id, ts, first_name, last_name) VALUES ('${id}', ${
+				Date.now() * 1000
+			}, '${escape(faker.person.firstName())}', '${escape(faker.person.lastName())}');`
 	)
 	await Promise.all(queries.map(query => sql.unsafe(query)))
 	return ids
@@ -60,16 +59,23 @@ async function pickAuthors(ids: string[]) {
 async function initSQL() {
 	try {
 		await sql.unsafe(`
-		DROP TABLE IF EXISTS AUTHORS;
-
-		CREATE TABLE AUTHORS
-		(
-			id text PRIMARY KEY, 
-			first_name text,
-			last_name text
-		);
+		DROP TABLE IF EXISTS authors;
 	`)
 	} catch (error) {
-		console.log("Already initialized", error)
+		// console.log("\nCan't drop tables. Do they already exist?\n\n", error)
+	}
+
+	try {
+		await sql.unsafe(`
+		CREATE TABLE IF NOT EXISTS authors
+		(
+			id UUID,
+			ts TIMESTAMP,
+			first_name TEXT,
+			last_name TEXT
+		) TIMESTAMP(ts) PARTITION BY DAY;
+	`)
+	} catch (error) {
+		console.log("Can't crate tables:", error)
 	}
 }
