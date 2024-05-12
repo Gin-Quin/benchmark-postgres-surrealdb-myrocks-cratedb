@@ -17,14 +17,16 @@ const data = ids.map(id => ({
 	$lastName: escape(faker.person.lastName()),
 }))
 
-let now = Date.now()
-data
-	.slice(0, 1024)
-	.forEach(record =>
-		insertauthorsQuery.run(record.$id, record.$firstName, record.$lastName)
-	)
-console.log("(list) Write authors one by one:", (Date.now() - now) * 2, "ms")
+// {
+// 	const now = Date.now()
+// data.forEach(record =>
+// 	insertauthorsQuery.run(record.$id, record.$firstName, record.$lastName)
+// )
+// console.log("(list) Write authors one by one:", Date.now() - now, "ms")
+// }
 
-now = Date.now()
-data.slice(1024).forEach(record => insertauthorsQuery2.run(record))
-console.log("(object) Write authors one by one:", (Date.now() - now) * 2, "ms")
+{
+	const now = Date.now()
+	data.forEach(record => insertauthorsQuery2.run(record))
+	console.log("(object) Write authors one by one:", Date.now() - now, "ms")
+}

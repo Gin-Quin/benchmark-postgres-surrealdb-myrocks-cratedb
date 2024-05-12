@@ -2,6 +2,13 @@
  * Test SQLite with bun and node+better-sqlite3 on a Fly.io instance.
  */
 function startBenchmarks() {
+	console.log("\n[------ Convex ------]")
+	spawn("convex", "write")
+	console.log(" ~ ")
+	spawn("convex", "update")
+	console.log(" ~ ")
+	spawn("convex", "pick")
+
 	console.log("\n[------ Bun + FS ------]")
 	spawn("fs-bun", "write")
 	console.log(" ~ ")
@@ -24,13 +31,13 @@ function startBenchmarks() {
 	spawn("sqlite-bun", "pick")
 	spawn("sqlite-bun", "read")
 
-	console.log("\n[------ Node + SQLite ------]")
-	spawn("sqlite-node", "init")
-	spawn("sqlite-node", "write")
-	spawn("sqlite-bun", "update")
-	spawn("sqlite-node", "batch")
-	spawn("sqlite-node", "pick")
-	spawn("sqlite-node", "read")
+	// console.log("\n[------ Node + SQLite ------]")
+	// spawn("sqlite-node", "init")
+	// spawn("sqlite-node", "write")
+	// spawn("sqlite-bun", "update")
+	// spawn("sqlite-node", "batch")
+	// spawn("sqlite-node", "pick")
+	// spawn("sqlite-node", "read")
 
 	console.log("\n[------ Bun + Level ------]")
 	spawn("level-bun", "write")
@@ -48,7 +55,7 @@ function startBenchmarks() {
 }
 
 function spawn(
-	target: `${"sqlite" | "level" | "fs"}-${"bun" | "node"}`,
+	target: `${"sqlite" | "level" | "fs"}-${"bun" | "node"}` | "convex",
 	operation: `${"init" | "write" | "batch" | "pick" | "read" | "update"}`
 ) {
 	const args = ["bun", "run", `./src/${target}/${operation}.ts`]

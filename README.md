@@ -67,12 +67,18 @@ This is not an extensive benchmark, relations have not been tested. Only writes 
     <th>11ms</th>
     <th>?</th>
   </tr>
+  <tr>
+    <th>Convex</th>
+    <th>40_347ms</th>
+    <th>12_051ms</th>
+    <th>953ms</th>
+  </tr>
 </table>
 
 ## Conclusion
 
 - If you need a huge amount of small writes, Postgres is not to be considered. If you don't need to perform database scanning, LevelDB and RocksDB are the best choices. Otherwise, Scylla is overperforming other databases, and Crate is quite good as well.
-- If you need to read big amounts of data, Postgres is by far the best. All other databases are quite slow, and Scylla is the worst by far.
+- If you need to read big amounts of data, SQL databases are the best, then SurrealDB, then NoSQL databases.
 - If you need to read a lot of small elements by id rather than bulks of data, Scylla is a good option, outperforming Surreal.
 - Postgres, Surreal, LevelDB and RocksDB are the most stable databases, as they never crashed. Scylla crashes when you get more than 2048 simultaneous requests, which is a shame because it's where it shines. Crate crashes when you have a lot of simultaneous reads (it's an error from the postgres driver though, but still proves some instability).
 - Crate has an annoying drawback: when you make a write, the change is not immediately effective and you can't read it before about 1 second. It may cause some annoying bugs.
@@ -81,3 +87,11 @@ This is not an extensive benchmark, relations have not been tested. Only writes 
 - Node with better-sqlite-3 seems faster than Bun's SQLite for writing and picking specific values to database, but Bun's SQLite is extremely fast to scan the database.
 - Surreal offers an awesome developer experience. The documentation is very clear, the installation super smooth, and the SDKs as well as the query language are great. It's 3 times better than Postgres for writing documents separately, but 3 to 6 times slower to read these documents. Might be a good alternative for write-intensive projects.
 - Except for Postgres, the other databases are bad for migration. Migrating a database means transforming the structure of a table. If you opt for a NoSQL database, you should use "soft migrations" (migrating a document when the document is loaded) rather than "hard migration" (migrating all documents at once).
+
+### Convex
+
+I also tested the performances of the [Convex](https://www.convex.dev/) database. The performances were extremely poor, especially for small simultaneous and independants reads and writes. It also crashes when too many simultaneous writes and reads are run. It has been tested on a local server, so latency is not an excuse.
+
+Convex has an awesome DX, especially for those that are used to Typescript, but it's not suitable for projects with heavy workloads. It's ideal for B2B SAAS that don't have too many customers and hobby projects.
+
+Although it's worth to note that in opposition to other databases, Convex offers built-in reactivity.
