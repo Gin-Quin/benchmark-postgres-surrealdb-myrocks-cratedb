@@ -12,11 +12,13 @@
 | **LMDB** | WSL | 43.57ms | 5.88ms | - | - | - |
 | **LevelDB** | Mac | 16.94ms | 3.84ms | - | - | - |
 | **LevelDB** | Windows | 48.38ms | 16.43ms | - | - | - |
+| **LevelDB** | WSL | 58.42ms | 11.54ms | - | - | - |
 | **PostgreSQL** | Mac | 29.23ms | 26.35ms | 2.88ms | 1.63ms | 3.77ms |
 | **PostgreSQL** | Windows | 122.97ms | 68.90ms | 6.14ms | 2.75ms | 4.30ms |
 | **PostgreSQL** | WSL | 48.88ms | 57.46ms | 7.24ms | 6.57ms | 3.96ms |
 | **SurrealDB** | Mac | 37.86ms | 44.04ms | 159.73ms | 6.09ms | 6.28ms |
 | **SurrealDB** | Windows | 62.22ms | 189.01ms | 320.61ms | 10.53ms | 10.94ms |
+| **SurrealDB** | WSL | 64.46ms | 216.57ms | 402.50ms | 1.15ms | 19.21ms |
 | **TimescaleDB** | Mac | 40.42ms | 35.62ms | 3.44ms | 1.18ms | 1.25ms |
 | **TimescaleDB** | Windows | 119.92ms | 86.48ms | 9.52ms | 4.35ms | 3.49ms |
 | **TimescaleDB** | WSL | 83.15ms | 78.58ms | 9.97ms | 7.61ms | 3.05ms |
@@ -35,11 +37,13 @@
 | **SQLite (Bun)** | WSL | 12.05s | ~83,000 | 🥈 2nd |
 | **LevelDB** | Mac | 5.72s | ~174,800 | 🥉 3rd |
 | **LevelDB** | Windows | 29.30s | ~34,100 | 🥉 3rd |
+| **LevelDB** | WSL | 19.64s | ~50,900 | 4th |
 | **PostgreSQL** | Mac | 7.12s | ~140,400 | 4th |
 | **PostgreSQL** | Windows | 13.63s | ~73,400 | 🥈 2nd |
 | **PostgreSQL** | WSL | 13.25s | ~75,500 | 🥉 3rd |
 | **SurrealDB** | Mac | 12.58s | ~79,500 | 5th |
 | **SurrealDB** | Windows | 30.44s | ~32,800 | 4th |
+| **SurrealDB** | WSL | 29.46s | ~34,000 | 5th |
 | **TimescaleDB** | Mac | 31.41s | ~31,800 | 6th |
 | **TimescaleDB** | Windows | 123.90s | ~8,100 | 6th |
 | **TimescaleDB** | WSL | 128.59s | ~7,800 | 4th |
@@ -57,8 +61,10 @@
 | **LMDB** | WSL | 26.72ms | 5.76ms | - | - | - |
 | **LevelDB** | Mac | 10.92ms | 2.28ms | - | - | - |
 | **LevelDB** | Windows | 20.07ms | 12.31ms | - | - | - |
+| **LevelDB** | WSL | 38.87ms | 10.71ms | - | - | - |
 | **SurrealDB** | Mac | 30.40ms | 37.70ms | 76.08s | 5.60ms | 966.01ms |
 | **SurrealDB** | Windows | 80.12ms | 201.61ms | 173.03s | 50.95ms | 5.21s |
+| **SurrealDB** | WSL | 90.48ms | 196.72ms | 181.06s | 40.63ms | 5.37s |
 | **TimescaleDB** | Mac | 31.14ms | 8.47s | 294.91ms | 5.62ms | 2.27ms |
 | **TimescaleDB** | Windows | 96.69ms | 17.91s | 800.08ms | 32.10ms | 6.57ms |
 | **TimescaleDB** | WSL | 56.30ms | 15.44s | 765.43ms | 26.58ms | 6.57ms |
@@ -89,8 +95,10 @@
 | **LMDB** | WSL | 65MB | 171MB | 106MB | ~106MB |
 | **LevelDB** | Mac | 37MB | 217MB | 180MB | ~180MB |
 | **LevelDB** | Windows | 147MB | 357MB | 210MB | ~210MB |
+| **LevelDB** | WSL | 49MB | 153MB | 104MB | ~104MB |
 | **SurrealDB** | Mac | 128MB | 401MB | 273MB | ~273MB |
 | **SurrealDB** | Windows | 293MB | 476MB | 183MB | ~183MB |
+| **SurrealDB** | WSL | 125MB | 257MB | 132MB | ~132MB |
 | **TimescaleDB** | Windows | 309MB | 406MB | 97MB | ~97MB |
 | **DuckDB** | Mac | 304MB | 682MB | 378MB | ~378MB |
 | **DuckDB** | Windows | 309MB | 392MB | 83MB | ~83MB |
@@ -141,14 +149,22 @@
   - Windows: 52MB initial, 1986MB final (extreme usage)
 
 #### LevelDB Performance Comparison:
-- **Empty DB Operations**: Windows is 2.9-4.3x slower than Mac
-  - Insert: 48.38ms vs 16.94ms (2.9x slower)
-  - Pick: 16.43ms vs 3.84ms (4.3x slower)
-- **Bulk Insert**: Windows is 5.1x slower (29.30s vs 5.72s)
-- **Populated DB Operations**: Windows is slower
-  - Insert: 20.07ms vs 10.92ms (1.8x slower)
-  - Pick: 12.31ms vs 2.28ms (5.4x slower)
-- **Memory Usage**: Windows uses 4.0x more memory initially (147MB vs 37MB)
+- **Empty DB Operations**: 
+  - Mac is fastest, WSL is middle, Windows is slowest
+  - Insert: Mac 16.94ms, WSL 58.42ms, Windows 48.38ms
+  - Pick: Mac 3.84ms, WSL 11.54ms, Windows 16.43ms
+- **Bulk Insert**: 
+  - Mac: 5.72s (175k records/sec) - fastest
+  - WSL: 19.64s (51k records/sec) - 3.4x slower than Mac
+  - Windows: 29.30s (34k records/sec) - 5.1x slower than Mac
+- **Populated DB Operations**: 
+  - Mac is fastest, WSL is middle, Windows is slowest
+  - Insert: Mac 10.92ms, WSL 38.87ms, Windows 20.07ms
+  - Pick: Mac 2.28ms, WSL 10.71ms, Windows 12.31ms
+- **Memory Usage**: 
+  - Mac: 37MB initial, 217MB final
+  - WSL: 49MB initial, 153MB final (most efficient)
+  - Windows: 147MB initial, 357MB final (highest usage)
 
 #### PostgreSQL Performance Comparison:
 - **Empty DB Operations**: 
@@ -170,16 +186,24 @@
   - Windows: 321MB initial, 440MB final (highest usage)
 
 #### SurrealDB Performance Comparison:
-- **Empty DB Operations**: Windows is 1.6-2.0x slower than Mac
-  - Insert: 62.22ms vs 37.86ms (1.6x slower)
-  - Pick: 189.01ms vs 44.04ms (4.3x slower)
-  - Select: 320.61ms vs 159.73ms (2.0x slower)
-- **Bulk Insert**: Windows is 2.4x slower (30.44s vs 12.58s)
-- **Populated DB Operations**: Windows is significantly slower
-  - Insert: 80.12ms vs 30.40ms (2.6x slower)
-  - Pick: 201.61ms vs 37.70ms (5.3x slower)
-  - Select: 173.03s vs 76.08s (2.3x slower)
-- **Memory Usage**: Windows uses 2.3x more memory initially (293MB vs 128MB)
+- **Empty DB Operations**: 
+  - Mac is fastest, WSL is middle, Windows is slowest
+  - Insert: Mac 37.86ms, WSL 64.46ms, Windows 62.22ms
+  - Pick: Mac 44.04ms, WSL 216.57ms, Windows 189.01ms
+  - Select: Mac 159.73ms, WSL 402.50ms, Windows 320.61ms
+- **Bulk Insert**: 
+  - Mac: 12.58s (80k records/sec) - fastest
+  - WSL: 29.46s (34k records/sec) - 2.3x slower than Mac
+  - Windows: 30.44s (33k records/sec) - 2.4x slower than Mac
+- **Populated DB Operations**: 
+  - Mac is fastest, WSL and Windows are slower
+  - Insert: Mac 30.40ms, WSL 90.48ms, Windows 80.12ms
+  - Pick: Mac 37.70ms, WSL 196.72ms, Windows 201.61ms
+  - Select: Mac 76.08s, WSL 181.06s, Windows 173.03s
+- **Memory Usage**: 
+  - Mac: 128MB initial, 401MB final
+  - WSL: 125MB initial, 257MB final (most efficient)
+  - Windows: 293MB initial, 476MB final (highest usage)
 
 #### TimescaleDB Performance Comparison:
 - **Empty DB Operations**: 

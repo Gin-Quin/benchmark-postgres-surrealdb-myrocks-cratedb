@@ -298,8 +298,10 @@
 |----------|---------------------|--------------|------------------|-------------------|-------------|
 | **SQLite (Bun)** | 18.43ms | 9.22ms | 4.10ms | 1.07ms | 0.90ms |
 | **LMDB** | 43.57ms | 5.88ms | - | - | - |
+| **LevelDB** | 58.42ms | 11.54ms | - | - | - |
 | **PostgreSQL** | 48.88ms | 57.46ms | 7.24ms | 6.57ms | 3.96ms |
 | **TimescaleDB** | 83.15ms | 78.58ms | 9.97ms | 7.61ms | 3.05ms |
+| **SurrealDB** | 64.46ms | 216.57ms | 402.50ms | 1.15ms | 19.21ms |
 | **DuckDB** | 10.63s | 657.14ms | 35.06ms | 2.72ms | 1.62ms |
 
 ## Bulk Insert Performance Comparison
@@ -309,17 +311,21 @@
 | **LMDB** | 7.21s | ~138,700 | 🥇 1st |
 | **SQLite (Bun)** | 12.05s | ~83,000 | 🥈 2nd |
 | **PostgreSQL** | 13.25s | ~75,500 | 🥉 3rd |
-| **TimescaleDB** | 128.59s | ~7,800 | 4th |
-| **DuckDB** | 489.82s | ~2,000 | 5th |
+| **LevelDB** | 19.64s | ~50,900 | 4th |
+| **SurrealDB** | 29.46s | ~34,000 | 5th |
+| **TimescaleDB** | 128.59s | ~7,800 | 6th |
+| **DuckDB** | 489.82s | ~2,000 | 7th |
 
 ## Populated Database Performance Comparison (1M+ records)
 
 | Database | Insert 2048 Records | Pick Records | Select Benchmark | Complex Analytical | Aggregation |
 |----------|---------------------|--------------|------------------|-------------------|-------------|
 | **LMDB** | 26.72ms | 5.76ms | - | - | - |
+| **LevelDB** | 38.87ms | 10.71ms | - | - | - |
 | **SQLite (Bun)** | 123.27ms | 11.72ms | 4.94ms | 485.28ms | 284.62ms |
 | **PostgreSQL** | 46.00ms | 31.03ms | 19.07ms | 127.88ms | 1228.78ms |
 | **TimescaleDB** | 56.30ms | 15.44s | 765.43ms | 26.58ms | 6.57ms |
+| **SurrealDB** | 90.48ms | 196.72ms | 181.06s | 40.63ms | 5.37s |
 | **DuckDB** | 10.99s | 719.80ms | 37.25ms | 32.40ms | 9.45ms |
 
 ## Memory Usage Comparison
@@ -328,8 +334,10 @@
 |----------|----------------|--------------|--------------|---------------------|
 | **SQLite (Bun)** | 142MB | 217MB | 75MB | ~75MB |
 | **LMDB** | 65MB | 171MB | 106MB | ~106MB |
+| **LevelDB** | 49MB | 153MB | 104MB | ~104MB |
 | **PostgreSQL** | 150MB | 193MB | 43MB | ~43MB |
 | **TimescaleDB** | 133MB | 156MB | 23MB | ~23MB |
+| **SurrealDB** | 125MB | 257MB | 132MB | ~132MB |
 | **DuckDB** | 219MB | 494MB | 275MB | ~275MB |
 
 ### Key Insights:
