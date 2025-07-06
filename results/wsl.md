@@ -295,3 +295,117 @@ external: 8,
 Memory usage - Before: 155MB, After: 149MB, Diff: -6MB
 
 🏁 Benchmark complete!
+
+# LevelDB
+
+# bun run tests/levelup.ts
+
+# 🧪 LevelDB Performance Benchmark
+
+📊 PHASE 1: Benchmark with empty database
+Memory before: {
+rss: 49,
+heapUsed: 0,
+heapTotal: 2,
+external: 0,
+}
+
+--- EMPTY DB BENCHMARK ---
+[58.42ms] Insert 2048 key-value pairs
+[11.54ms] Pick key-value pairs
+[9.25ms] Batch get operation
+[11.61ms] Range scan (first 1000)
+[0.68ms] Key existence check
+Memory usage - Before: 49MB, After: 88MB, Diff: 39MB
+
+📦 PHASE 2: Loading bulk data...
+Adding 1,000,000 records...
+Inserting 1,000,000 records in 100 batches of 10,000...
+Completed 100,000 / 1,000,000 records
+Completed 200,000 / 1,000,000 records
+Completed 300,000 / 1,000,000 records
+Completed 400,000 / 1,000,000 records
+Completed 500,000 / 1,000,000 records
+Completed 600,000 / 1,000,000 records
+Completed 700,000 / 1,000,000 records
+Completed 800,000 / 1,000,000 records
+Completed 900,000 / 1,000,000 records
+Completed 1,000,000 / 1,000,000 records
+✅ Bulk insert completed successfully
+[19.64s] Bulk data insert
+Database now contains ~1,000,000 + 2048 total records
+Memory after bulk insert: {
+rss: 153,
+heapUsed: 13,
+heapTotal: 19,
+external: 1,
+}
+
+📊 PHASE 3: Benchmark with populated database
+
+--- POPULATED DB BENCHMARK ---
+[38.87ms] Insert 2048 key-value pairs
+[10.71ms] Pick key-value pairs
+[7.34ms] Batch get operation
+[8.32ms] Range scan (first 1000)
+[0.38ms] Key existence check
+Memory usage - Before: 153MB, After: 166MB, Diff: 13MB
+
+🏁 Benchmark complete!
+
+# SurrealDB
+
+# bun run tests/surreal.ts
+
+# 🧪 SurrealDB Performance Benchmark
+
+📊 PHASE 1: Benchmark with empty database
+Memory before: {
+rss: 125,
+heapUsed: 14,
+heapTotal: 15,
+external: 5,
+}
+
+--- EMPTY DB BENCHMARK ---
+[64.46ms] Insert 2048 authors
+[216.57ms] Pick authors
+[402.50ms] Select benchmark authors
+[1.15ms] Complex analytical query
+[19.21ms] Aggregation query
+Memory usage - Before: 125MB, After: 135MB, Diff: 10MB
+
+📦 PHASE 2: Loading bulk data...
+Adding 1,000,000 records...
+Inserting 1,000,000 records in 100 batches of 10,000...
+Completed 100,000 / 1,000,000 records
+Completed 200,000 / 1,000,000 records
+Completed 300,000 / 1,000,000 records
+Completed 400,000 / 1,000,000 records
+Completed 500,000 / 1,000,000 records
+Completed 600,000 / 1,000,000 records
+Completed 700,000 / 1,000,000 records
+Completed 800,000 / 1,000,000 records
+Completed 900,000 / 1,000,000 records
+Completed 1,000,000 / 1,000,000 records
+✅ Bulk insert completed successfully
+[29.46s] Bulk data insert
+Database now contains 0 total records
+Memory after bulk insert: {
+rss: 257,
+heapUsed: 40,
+heapTotal: 79,
+external: 21,
+}
+
+📊 PHASE 3: Benchmark with populated database
+
+--- POPULATED DB BENCHMARK ---
+[90.48ms] Insert 2048 authors
+[196.72ms] Pick authors
+[181.06s] Select benchmark authors
+[40.63ms] Complex analytical query
+[5.37s] Aggregation query
+Memory usage - Before: 257MB, After: 256MB, Diff: -1MB
+
+🏁 Benchmark complete!
