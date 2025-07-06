@@ -12,6 +12,27 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: postgres
 
+  postgres_timescale:
+    container_name: benchmark-postgres-timescale
+    image: timescale/timescaledb:latest-pg17
+    restart: always
+    ports:
+      - "54352:5432"
+    command: postgres -c max_connections=200
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+
+  # umbra:
+  #   container_name: benchmark-umbra
+  #   image: umbradb/umbra:latest
+  #   restart: always
+  #   ports:
+  #     - "5437:5432"
+  #   environment:
+  #     UMBRA_PASSWORD: postgres
+  #     UMBRA_USER: postgres
+
   # myRocks:
   #   container_name: benchmark-myrocks
   #   image: blep/docker-mariadb-myrocks:latest
@@ -21,21 +42,21 @@ services:
   #   environment:
   #     MYSQL_ROOT_PASSWORD: secret
 
-  crateDB:
-    container_name: benchmark-cratedb
-    image: crate:latest
-    restart: always
-    ports:
-      - "4200:4200"
-      - "5436:5432"
-    environment:
-      CRATE_HEAP_SIZE: 2g
-  
+  # crateDB:
+  #   container_name: benchmark-cratedb
+  #   image: crate:latest
+  #   restart: always
+  #   ports:
+  #     - "4200:4200"
+  #     - "5436:5432"
+  #   environment:
+  #     CRATE_HEAP_SIZE: 2g
+
   surrealdb:
     container_name: benchmark-surrealdb
-    entrypoint: 
-      - /surreal 
-      - start 
+    entrypoint:
+      - /surreal
+      - start
       - --user
       - root
       - --pass
@@ -53,3 +74,22 @@ services:
     ports:
       - "9042:9042"
       - "9160:9160"
+
+  # firebolt-core:
+  #   image: ghcr.io/firebolt-db/firebolt-core:preview-rc
+  #   container_name: firebolt-core
+  #   restart: "no" # matches --rm behavior (ephemeral, optional)
+  #   ulimits:
+  #     memlock:
+  #       soft: 8589934592
+  #       hard: 8589934592
+  #   security_opt:
+  #     - seccomp=unconfined
+  #   volumes:
+  #     - ./firebolt-core-data:/firebolt-core/volume
+  #   ports:
+  #     - "3473:3473"
+  #   environment:
+  #     - FIREBOLT_DISABLE_MEMORY_PRESSURE_MONITORING=1
+  #     - FIREBOLT_SKIP_PSI_CHECK=1
+  #     - FB_DISABLE_MEMORY_PRESSURE=true

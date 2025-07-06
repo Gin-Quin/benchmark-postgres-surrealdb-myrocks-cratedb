@@ -3,6 +3,10 @@
 **/*.db
 **/*.db-*
 
+.DS_Store
+
+**/*.duckdb*
+
 # Logs
 
 logs

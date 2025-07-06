@@ -1,14 +1,10 @@
 import { fakerDE as faker } from "@faker-js/faker";
-import postgres from "postgres";
-import { escape } from "./utilities/escape";
+import { DuckDBInstance } from "@duckdb/node-api";
 import { randomUUID } from "crypto";
+import { escape } from "./utilities/escape";
 
-const sql = postgres({
-	host: "localhost",
-	username: "postgres",
-	password: "password",
-	port: 5435,
-});
+let instance: DuckDBInstance;
+let connection: any;
 
 const BENCHMARK_COUNT = 2048;
 const BULK_DATA_COUNT = 1_000_000; // 1 million records
@@ -29,7 +25,7 @@ async function main() {
 	await initSQL();
 
 	console.log("=".repeat(60));
-	console.log("🧪 PostgreSQL Performance Benchmark");
+	console.log("🧪 DuckDB Performance Benchmark");
 	console.log("=".repeat(60));
 
 	// Run benchmark with empty database
@@ -54,43 +50,43 @@ async function main() {
 	await runBenchmark("POPULATED DB");
 
 	console.log("\n🏁 Benchmark complete!");
-	await sql.end();
+	connection.closeSync();
 }
 
 async function initSQL() {
-	try {
-		await sql.unsafe(`
-		DROP TABLE IF EXISTS BOOKS;
-		DROP TABLE IF EXISTS AUTHORS;
+	instance = await DuckDBInstance.create("test_large.duckdb", {
+		threads: "4",
+	});
+	connection = await instance.connect();
 
-		CREATE TABLE AUTHORS
-		(
-			id TEXT PRIMARY KEY,
-			first_name TEXT,
-			last_name TEXT,
-			email TEXT,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-		);
+	await connection.run(`
+	DROP TABLE IF EXISTS BOOKS;
+	DROP TABLE IF EXISTS AUTHORS;
 
-		CREATE TABLE BOOKS
-		(
-			id TEXT PRIMARY KEY,
-			title TEXT,
-			author TEXT REFERENCES AUTHORS(id),
-			isbn TEXT,
-			price INTEGER,
-			publication_year INTEGER,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-		);
+	CREATE TABLE AUTHORS
+	(
+		id VARCHAR PRIMARY KEY,
+		first_name VARCHAR,
+		last_name VARCHAR,
+		email VARCHAR,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);
 
-		-- Create indexes for better performance
-		CREATE INDEX idx_authors_name ON AUTHORS(first_name, last_name);
-		CREATE INDEX idx_books_author ON BOOKS(author);
-		CREATE INDEX idx_books_year ON BOOKS(publication_year);
-		`);
-	} catch (error) {
-		console.log("Already initialized", error);
-	}
+	CREATE TABLE BOOKS
+	(
+		id VARCHAR PRIMARY KEY,
+		title VARCHAR,
+		author VARCHAR REFERENCES AUTHORS(id),
+		isbn VARCHAR,
+		price INTEGER,
+		publication_year INTEGER,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);
+
+	-- Create indexes for better performance
+	CREATE INDEX idx_authors_name ON AUTHORS(first_name, last_name);
+	CREATE INDEX idx_books_author ON BOOKS(author);
+	CREATE INDEX idx_books_year ON BOOKS(publication_year);`);
 }
 
 async function runBenchmark(phase: string) {
@@ -111,7 +107,11 @@ async function runBenchmark(phase: string) {
 
 	// Select all benchmark records
 	console.time("Select benchmark authors");
-	await sql`SELECT * FROM AUTHORS WHERE id = ANY(${ids})`;
+	const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
+	await connection.run(
+		`SELECT * FROM AUTHORS WHERE id IN (${placeholders})`,
+		ids,
+	);
 	console.timeEnd("Select benchmark authors");
 
 	// Complex analytical query
@@ -138,37 +138,42 @@ async function insertBulkData(count: number) {
 		`Inserting ${count.toLocaleString()} records in ${batches} batches of ${batchSize.toLocaleString()}...`,
 	);
 
+	// Use transaction for better performance
+	await connection.run("BEGIN TRANSACTION");
+
 	try {
-		// Use transaction for better performance
-		await sql.begin(async (sql) => {
-			for (let batch = 0; batch < batches; batch++) {
-				const currentBatchSize = Math.min(batchSize, count - batch * batchSize);
+		const prepared = await connection.prepare(
+			`INSERT INTO authors (id, first_name, last_name, email) VALUES ($1, $2, $3, $4)`,
+		);
 
-				const values = [];
-				for (let i = 0; i < currentBatchSize; i++) {
-					const firstName = escape(faker.person.firstName());
-					const lastName = escape(faker.person.lastName());
+		for (let batch = 0; batch < batches; batch++) {
+			const currentBatchSize = Math.min(batchSize, count - batch * batchSize);
 
-					values.push({
-						id: randomUUID(),
-						first_name: firstName,
-						last_name: lastName,
-						email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
-					});
-				}
+			for (let i = 0; i < currentBatchSize; i++) {
+				const firstName = escape(faker.person.firstName());
+				const lastName = escape(faker.person.lastName());
 
-				await sql`INSERT INTO authors ${sql(values)}`;
-
-				if ((batch + 1) % 10 === 0) {
-					console.log(
-						`  Completed ${((batch + 1) * batchSize).toLocaleString()} / ${count.toLocaleString()} records`,
-					);
-				}
+				prepared.bindVarchar(1, randomUUID());
+				prepared.bindVarchar(2, firstName);
+				prepared.bindVarchar(3, lastName);
+				prepared.bindVarchar(
+					4,
+					`${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
+				);
+				await prepared.run();
 			}
-		});
 
+			if ((batch + 1) % 10 === 0) {
+				console.log(
+					`  Completed ${((batch + 1) * batchSize).toLocaleString()} / ${count.toLocaleString()} records`,
+				);
+			}
+		}
+
+		await connection.run("COMMIT");
 		console.log("✅ Bulk insert completed successfully");
 	} catch (error) {
+		await connection.run("ROLLBACK");
 		console.error("❌ Bulk insert failed:", error);
 		throw error;
 	}
@@ -177,32 +182,40 @@ async function insertBulkData(count: number) {
 async function insertAuthors(count: number) {
 	const ids = new Array(count).fill(0).map(() => randomUUID());
 
-	// Use bulk insert for better performance
-	const values = ids.map((id) => {
+	const prepared = await connection.prepare(
+		`INSERT INTO authors (id, first_name, last_name, email) VALUES ($1, $2, $3, $4)`,
+	);
+
+	for (const id of ids) {
 		const firstName = escape(faker.person.firstName());
 		const lastName = escape(faker.person.lastName());
 
-		return {
-			id,
-			first_name: firstName,
-			last_name: lastName,
-			email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
-		};
-	});
+		prepared.bindVarchar(1, id);
+		prepared.bindVarchar(2, firstName);
+		prepared.bindVarchar(3, lastName);
+		prepared.bindVarchar(
+			4,
+			`${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
+		);
+		await prepared.run();
+	}
 
-	await sql`INSERT INTO authors ${sql(values)}`;
 	return ids;
 }
 
 async function pickAuthors(ids: string[]) {
-	// Use prepared statement equivalent for better performance
-	await Promise.all(
-		ids.map((id) => sql`SELECT * FROM authors WHERE id = ${id}`),
+	const prepared = await connection.prepare(
+		`SELECT * FROM authors WHERE id = $1`,
 	);
+
+	for (const id of ids) {
+		prepared.bindVarchar(1, id);
+		await prepared.run();
+	}
 }
 
 async function complexAnalyticalQuery() {
-	await sql`
+	await connection.run(`
 		SELECT
 			SUBSTRING(first_name, 1, 1) as first_letter,
 			COUNT(*) as author_count,
@@ -215,11 +228,11 @@ async function complexAnalyticalQuery() {
 		HAVING COUNT(*) > 10
 		ORDER BY author_count DESC
 		LIMIT 10
-	`;
+	`);
 }
 
 async function aggregationQuery() {
-	await sql`
+	await connection.run(`
 		SELECT
 			COUNT(*) as total_authors,
 			COUNT(DISTINCT first_name) as unique_first_names,
@@ -227,10 +240,12 @@ async function aggregationQuery() {
 			AVG(LENGTH(first_name)) as avg_first_name_length,
 			AVG(LENGTH(last_name)) as avg_last_name_length
 		FROM authors
-	`;
+	`);
 }
 
 async function getDatabaseSize(): Promise<number> {
-	const result = await sql`SELECT COUNT(*) as count FROM authors`;
-	return Number(result[0].count);
+	const result = await connection.run(`SELECT COUNT(*) as count FROM authors`);
+	const reader = await result.fetchAllChunks();
+	const rows = reader[0].getRows();
+	return rows[0][0];
 }

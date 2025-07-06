@@ -1,4 +1,10 @@
-// clang -shared -fPIC librocks.c -o librocksdb_c.so -L /usr/local/lib -lrocksdb -O3
+/**
+ * COMPIATION INSTRUCTIONS
+ * 
+ * MacOS
+ * 1. Install RocksDB: brew install rocksdb
+ * 2. Compile the library: clang -shared -fPIC librocks.c -o librocksdb_c.so -I /opt/homebrew/include -L /opt/homebrew/lib -lrocksdb -O3
+ */
 
 #include <stdio.h>
 #include <string.h>
