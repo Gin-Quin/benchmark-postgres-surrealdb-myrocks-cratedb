@@ -222,3 +222,70 @@
 - **Sub-millisecond operations**: Fastest existence checks and excellent batch operations
 - **Stable performance**: No degradation with dataset size, consistent high performance
 - **Compression benefits**: Uses compression for efficient storage
+
+# Results on Windows
+
+## Empty Database Performance Comparison
+
+| Database | Insert 2048 Records | Pick Records | Select Benchmark | Complex Analytical | Aggregation |
+|----------|---------------------|--------------|------------------|-------------------|-------------|
+| **SQLite (Bun)** | 17.48ms | 7.51ms | 3.72ms | 1.36ms | 1.05ms |
+| **PostgreSQL** | 122.97ms | 68.90ms | 6.14ms | 2.75ms | 4.30ms |
+| **TimescaleDB** | 119.92ms | 86.48ms | 9.52ms | 4.35ms | 3.49ms |
+| **SurrealDB** | 62.22ms | 189.01ms | 320.61ms | 10.53ms | 10.94ms |
+| **LevelDB** | 48.38ms | 16.43ms | - | - | - |
+| **LMDB** | 226.17ms | 9.98ms | - | - | - |
+| **DuckDB** | 5.24s | 495.69ms | 41.99ms | 3.09ms | 1.13ms |
+
+## Bulk Insert Performance Comparison
+
+| Database | Time (1M records) | Records/sec | Ranking |
+|----------|-------------------|-------------|---------|
+| **SQLite (Bun)** | 10.32s | ~96,900 | 🥇 1st |
+| **PostgreSQL** | 13.63s | ~73,400 | 🥈 2nd |
+| **LevelDB** | 29.30s | ~34,100 | 🥉 3rd |
+| **SurrealDB** | 30.44s | ~32,800 | 4th |
+| **LMDB** | 48.66s | ~20,500 | 5th |
+| **TimescaleDB** | 123.90s | ~8,100 | 6th |
+| **DuckDB** | 348.42s | ~2,900 | 7th |
+
+## Populated Database Performance Comparison (1M+ records)
+
+| Database | Insert 2048 Records | Pick Records | Select Benchmark | Complex Analytical | Aggregation |
+|----------|---------------------|--------------|------------------|-------------------|-------------|
+| **LevelDB** | 20.07ms | 12.31ms | - | - | - |
+| **SQLite (Bun)** | 187.52ms | 11.19ms | 4.81ms | 548.97ms | 255.91ms |
+| **PostgreSQL** | 42.58ms | 37.49ms | 56.73ms | 341.91ms | 1362.76ms |
+| **SurrealDB** | 80.12ms | 201.61ms | 173.03s | 50.95ms | 5.21s |
+| **TimescaleDB** | 96.69ms | 17.91s | 800.08ms | 32.10ms | 6.57ms |
+| **LMDB** | 42.14ms | 6.01ms | - | - | - |
+| **DuckDB** | 5.47s | 589.57ms | 48.45ms | 28.79ms | 11.92ms |
+
+## Memory Usage Comparison
+
+| Database | Starting Memory | Final Memory | Total Growth | Growth per 1M Records |
+|----------|----------------|--------------|--------------|---------------------|
+| **SQLite (Bun)** | 315MB | 366MB | 51MB | ~51MB |
+| **PostgreSQL** | 321MB | 440MB | 119MB | ~119MB |
+| **TimescaleDB** | 309MB | 406MB | 97MB | ~97MB |
+| **SurrealDB** | 293MB | 476MB | 183MB | ~183MB |
+| **LevelDB** | 147MB | 357MB | 210MB | ~210MB |
+| **LMDB** | 52MB | 1986MB | 1934MB | ~1934MB |
+| **DuckDB** | 309MB | 392MB | 83MB | ~83MB |
+
+### Key Insights:
+
+**🏆 Performance Winners:**
+- **Bulk Insert Champion**: SQLite (Bun) - 96.9k records/sec
+- **Small Operations Leader**: SQLite (Bun) - consistently fastest for small-scale operations
+- **Memory Efficiency**: SQLite (Bun) - only 51MB growth per 1M records
+- **Key-Value Performance**: LevelDB - excellent performance for key-value operations
+- **Analytical Queries**: TimescaleDB - specialized for time-series analytics
+
+**⚠️ Notable Observations:**
+- **SQLite (Bun)** dominates in both performance and memory efficiency - the overall best choice for most use cases
+- **PostgreSQL** provides excellent balance of performance and SQL features with reasonable memory usage
+- **TimescaleDB** shows specialized time-series optimization advantages but with slower bulk operations
+- **SurrealDB** struggles with complex queries on large datasets
+- **LevelDB** excels at key-value operations with consistent performance
+- **LMDB** shows high memory usage but good key-value performance

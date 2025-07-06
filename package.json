@@ -27,6 +27,7 @@
     "pg": "^8.11.3",
     "postgres": "^3.3.5",
     "rocksdb": "^5.2.1",
-    "surrealdb.js": "^0.9.1"
+    "surrealdb.js": "^0.9.1",
+    "tsx": "^4.20.3"
   }
 }
