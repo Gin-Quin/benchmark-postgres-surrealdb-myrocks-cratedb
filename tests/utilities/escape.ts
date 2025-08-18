@@ -1,1 +1,1 @@
-export const escape = (value: string) => value.replace(/'/g, "\\'")
+export const escape = (value: string) => value.replace(/'/g, "\\'");

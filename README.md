@@ -8,6 +8,7 @@
 | **LMDB** | 15.91ms | 3.98ms | - | - | - |
 | **LevelDB** | 16.94ms | 3.84ms | - | - | - |
 | **PostgreSQL** | 29.23ms | 26.35ms | 2.88ms | 1.63ms | 3.77ms |
+| **CedarDB** | 29.29ms | 30.38ms | 1.50ms | 1.11ms | 7.17ms |
 | **SurrealDB** | 37.86ms | 44.04ms | 159.73ms | 6.09ms | 6.28ms |
 | **TimescaleDB** | 40.42ms | 35.62ms | 3.44ms | 1.18ms | 1.25ms |
 | **DuckDB** | 353.60ms | 137.12ms | 12.25ms | 1.59ms | 0.45ms |
@@ -20,9 +21,10 @@
 | **SQLite (Bun)** | 3.46s | ~289,000 | 🥈 2nd |
 | **LevelDB** | 5.72s | ~174,800 | 🥉 3rd |
 | **PostgreSQL** | 7.12s | ~140,400 | 4th |
-| **SurrealDB** | 12.58s | ~79,500 | 5th |
-| **TimescaleDB** | 31.41s | ~31,800 | 6th |
-| **DuckDB** | 73.07s | ~13,700 | 7th |
+| **CedarDB** | 10.40s | ~96,150 | 5th |
+| **SurrealDB** | 12.58s | ~79,500 | 6th |
+| **TimescaleDB** | 31.41s | ~31,800 | 7th |
+| **DuckDB** | 73.07s | ~13,700 | 8th |
 
 ## Populated Database Performance Comparison (1M+ records)
 
@@ -30,6 +32,7 @@
 |----------|---------------------|--------------|------------------|-------------------|-------------|
 | **LMDB** | 8.09ms | 2.31ms | - | - | - |
 | **LevelDB** | 10.92ms | 2.28ms | - | - | - |
+| **CedarDB** | 25.72ms | 52.64ms | 31.58ms | 24.19ms | 52.09ms |
 | **SurrealDB** | 30.40ms | 37.70ms | 76.08s | 5.60ms | 966.01ms |
 | **TimescaleDB** | 31.14ms | 8.47s | 294.91ms | 5.62ms | 2.27ms |
 | **PostgreSQL** | 66.46ms | 20.77ms | 7.57ms | 76.62ms | 1038.57ms |
@@ -43,6 +46,7 @@
 | **TimescaleDB** | 131MB | 177MB | 46MB | ~46MB |
 | **SQLite (Bun)** | 169MB | 270MB | 101MB | ~101MB |
 | **PostgreSQL** | 131MB | 247MB | 116MB | ~116MB |
+| **CedarDB** | 132MB | 252MB | 120MB | ~120MB |
 | **LMDB** | 56MB | 219MB | 163MB | ~163MB |
 | **LevelDB** | 37MB | 217MB | 180MB | ~180MB |
 | **SurrealDB** | 128MB | 401MB | 273MB | ~273MB |
@@ -222,3 +226,23 @@
 - **Sub-millisecond operations**: Fastest existence checks and excellent batch operations
 - **Stable performance**: No degradation with dataset size, consistent high performance
 - **Compression benefits**: Uses compression for efficient storage
+
+## CedarDB Performance Benchmark
+
+| Phase | Operation | Empty DB | Populated DB (1M+ records) | Memory Impact |
+|-------|-----------|----------|----------------------------|---------------|
+| **Phase 1** | Insert 2048 authors | 29.29ms | 25.72ms | +18MB → 0MB |
+| | Pick authors | 30.38ms | 52.64ms | |
+| | Select benchmark authors | 1.50ms | 31.58ms | |
+| | Complex analytical query | 1.11ms | 24.19ms | |
+| | Aggregation query | 7.17ms | 52.09ms | |
+| **Phase 2** | Bulk insert (1M records) | - | 10.40s | +120MB |
+
+### Key Observations:
+- **Good bulk insert performance**: 10.40 seconds for 1M records (≈96,150 records/sec) - faster than SurrealDB and TimescaleDB
+- **Memory efficient**: Started at 132MB, ended at 252MB after 1M+ records (120MB total growth)
+- **Strong empty database performance**: Excellent performance for most operations on empty database, particularly for select queries (1.50ms)
+- **Moderate query degradation**: Performance decreases with dataset size but remains reasonable (1.11ms → 24.19ms for complex analytical)
+- **Stable memory management**: Shows efficient memory usage with no growth during populated database operations
+- **Balanced performance**: Good all-around performance without extreme strengths or weaknesses
+- **Consistency**: Similar performance profile to standard PostgreSQL with some optimizations
